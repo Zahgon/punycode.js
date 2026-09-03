@@ -11,28 +11,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
         with:
-          node-version-file: '.nvmrc'
-      - name: Install dependencies
-        run: npm install
-      - name: Build
-        run: npm run build
-      - name: Test
-        run: npm test
-      - name: Publish punycode package
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+          server-id: central
+          server-username: MAVEN_CENTRAL_USERNAME
+          server-password: MAVEN_CENTRAL_PASSWORD
+          gpg-private-key: ${{secrets.MAVEN_GPG_PRIVATE_KEY}}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+      - name: Build and test
+        run: mvn --batch-mode verify
+      # Unlike the npm release, which published the same code under both the
+      # `punycode` and `punycode.js` names, a Maven artifact has a single set of
+      # coordinates: be.mathiasbynens:punycode.
+      - name: Publish to Maven Central
         env:
-          NPM_TOKEN: ${{secrets.NPM_TOKEN_PUNYCODE}}
-        run: |
-          npm config set registry 'https://wombat-dressing-room.appspot.com/'
-          npm config set '//wombat-dressing-room.appspot.com/:_authToken' '${NPM_TOKEN}'
-          npm publish
-      - name: Publish punycode.js package
-        env:
-          NPM_TOKEN: ${{secrets.NPM_TOKEN_PUNYCODE_JS}}
-        run: |
-          sed -i 's/"name": "punycode"/"name": "punycode.js"/' package.json
-          npm config set registry 'https://wombat-dressing-room.appspot.com/'
-          npm config set '//wombat-dressing-room.appspot.com/:_authToken' '${NPM_TOKEN}'
-          npm publish
+          MAVEN_CENTRAL_USERNAME: ${{secrets.MAVEN_CENTRAL_USERNAME}}
+          MAVEN_CENTRAL_PASSWORD: ${{secrets.MAVEN_CENTRAL_PASSWORD}}
+          MAVEN_GPG_PASSPHRASE: ${{secrets.MAVEN_GPG_PASSPHRASE}}
+        run: mvn --batch-mode --activate-profiles release -DskipTests deploy

@@ -1,11 +1,5 @@
-# Generated files
-punycode.es6.js
-
-# Coverage report
-coverage
-
-# Installed npm modules
-node_modules
+# Build output
+target
 
 # Folder view configuration files
 .DS_Store

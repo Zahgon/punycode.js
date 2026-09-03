@@ -1,8 +1,8 @@
-# Punycode.js [![punycode on npm](https://img.shields.io/npm/v/punycode)](https://www.npmjs.com/package/punycode) [![](https://data.jsdelivr.com/v1/package/npm/punycode/badge)](https://www.jsdelivr.com/package/npm/punycode)
+# Punycode [![Maven Central](https://img.shields.io/maven-central/v/be.mathiasbynens/punycode)](https://central.sonatype.com/artifact/be.mathiasbynens/punycode)
 
-Punycode.js is a robust Punycode converter that fully complies to [RFC 3492](https://tools.ietf.org/html/rfc3492) and [RFC 5891](https://tools.ietf.org/html/rfc5891).
+Punycode is a robust Punycode converter that fully complies to [RFC 3492](https://tools.ietf.org/html/rfc3492) and [RFC 5891](https://tools.ietf.org/html/rfc5891).
 
-This JavaScript library is the result of comparing, optimizing and documenting different open-source implementations of the Punycode algorithm:
+This Java library is the result of comparing, optimizing and documenting different open-source implementations of the Punycode algorithm:
 
 * [The C example code from RFC 3492](https://tools.ietf.org/html/rfc3492#appendix-C)
 * [`punycode.c` by _Markus W. Scherer_ (IBM)](http://opensource.apple.com/source/ICU/ICU-400.42/icuSources/common/punycode.c)
@@ -10,124 +10,138 @@ This JavaScript library is the result of comparing, optimizing and documenting d
 * [JavaScript implementation by _some_](http://stackoverflow.com/questions/183485/can-anyone-recommend-a-good-free-javascript-for-punycode-to-unicode-conversion/301287#301287)
 * [`punycode.js` by _Ben Noordhuis_](https://github.com/joyent/node/blob/426298c8c1c0d5b5224ac3658c41e7c2a3fe9377/lib/punycode.js) (note: [not fully compliant](https://github.com/joyent/node/issues/2072))
 
-This project was [bundled](https://github.com/joyent/node/blob/master/lib/punycode.js) with Node.js from [v0.6.2+](https://github.com/joyent/node/compare/975f1930b1...61e796decc) until [v7](https://github.com/nodejs/node/pull/7941) (soft-deprecated).
-
-This project provides a CommonJS module that uses ES2015+ features and JavaScript module, which work in modern Node.js versions and browsers. For the old Punycode.js version that offers the same functionality in a UMD build with support for older pre-ES2015 runtimes, including Rhino, Ringo, and Narwhal, see [v1.4.1](https://github.com/mathiasbynens/punycode.js/releases/tag/v1.4.1).
-
 ## Installation
 
-Via [npm](https://www.npmjs.com/):
+With [Maven](https://maven.apache.org/), add the dependency to your `pom.xml`:
 
-```bash
-npm install punycode --save
+```xml
+<dependency>
+  <groupId>be.mathiasbynens</groupId>
+  <artifactId>punycode</artifactId>
+  <version>2.3.1</version>
+</dependency>
 ```
 
-In [Node.js](https://nodejs.org/):
+With [Gradle](https://gradle.org/), add it to your `build.gradle`:
 
-> ⚠️ Note that userland modules don't hide core modules.
-> For example, `require('punycode')` still imports the deprecated core module even if you executed `npm install punycode`.
-> Use `require('punycode/')` to import userland modules rather than core modules.
-
-```js
-const punycode = require('punycode/');
+```groovy
+implementation 'be.mathiasbynens:punycode:2.3.1'
 ```
+
+Then import it:
+
+```java
+import be.mathiasbynens.punycode.Punycode;
+```
+
+The library requires Java 17 or newer and has no runtime dependencies.
 
 ## API
 
-### `punycode.decode(string)`
+All methods are `static`, and the class is stateless and safe for concurrent use. Input that cannot be represented — invalid Punycode, a code point that is not a Unicode scalar value, or a value that needs wider integers than the algorithm supports — raises a `PunycodeException`, which extends `IllegalArgumentException`.
+
+### `Punycode.decode(String string)`
 
 Converts a Punycode string of ASCII symbols to a string of Unicode symbols.
 
-```js
+```java
 // decode domain name parts
-punycode.decode('maana-pta'); // 'mañana'
-punycode.decode('--dqo34k'); // '☃-⌘'
+Punycode.decode("maana-pta"); // "mañana"
+Punycode.decode("--dqo34k");  // "☃-⌘"
 ```
 
-### `punycode.encode(string)`
+### `Punycode.encode(String string)`
 
 Converts a string of Unicode symbols to a Punycode string of ASCII symbols.
 
-```js
+```java
 // encode domain name parts
-punycode.encode('mañana'); // 'maana-pta'
-punycode.encode('☃-⌘'); // '--dqo34k'
+Punycode.encode("mañana"); // "maana-pta"
+Punycode.encode("☃-⌘");    // "--dqo34k"
 ```
 
-### `punycode.toUnicode(input)`
+### `Punycode.toUnicode(String input)`
 
 Converts a Punycode string representing a domain name or an email address to Unicode. Only the Punycoded parts of the input will be converted, i.e. it doesn’t matter if you call it on a string that has already been converted to Unicode.
 
-```js
+```java
 // decode domain names
-punycode.toUnicode('xn--maana-pta.com');
-// → 'mañana.com'
-punycode.toUnicode('xn----dqo34k.com');
-// → '☃-⌘.com'
+Punycode.toUnicode("xn--maana-pta.com");
+// → "mañana.com"
+Punycode.toUnicode("xn----dqo34k.com");
+// → "☃-⌘.com"
 
 // decode email addresses
-punycode.toUnicode('джумла@xn--p-8sbkgc5ag7bhce.xn--ba-lmcq');
-// → 'джумла@джpумлатест.bрфa'
+Punycode.toUnicode("джумла@xn--p-8sbkgc5ag7bhce.xn--ba-lmcq");
+// → "джумла@джpумлатест.bрфa"
 ```
 
-### `punycode.toASCII(input)`
+### `Punycode.toASCII(String input)`
 
 Converts a lowercased Unicode string representing a domain name or an email address to Punycode. Only the non-ASCII parts of the input will be converted, i.e. it doesn’t matter if you call it with a domain that’s already in ASCII.
 
-```js
+```java
 // encode domain names
-punycode.toASCII('mañana.com');
-// → 'xn--maana-pta.com'
-punycode.toASCII('☃-⌘.com');
-// → 'xn----dqo34k.com'
+Punycode.toASCII("mañana.com");
+// → "xn--maana-pta.com"
+Punycode.toASCII("☃-⌘.com");
+// → "xn----dqo34k.com"
 
 // encode email addresses
-punycode.toASCII('джумла@джpумлатест.bрфa');
-// → 'джумла@xn--p-8sbkgc5ag7bhce.xn--ba-lmcq'
+Punycode.toASCII("джумла@джpумлатест.bрфa");
+// → "джумла@xn--p-8sbkgc5ag7bhce.xn--ba-lmcq"
 ```
 
-### `punycode.ucs2`
+### `Punycode.Ucs2`
 
-#### `punycode.ucs2.decode(string)`
+#### `Punycode.Ucs2.decode(String string)`
 
-Creates an array containing the numeric code point values of each Unicode symbol in the string. While [JavaScript uses UCS-2 internally](https://mathiasbynens.be/notes/javascript-encoding), this function will convert a pair of surrogate halves (each of which UCS-2 exposes as separate characters) into a single code point, matching UTF-16.
+Creates an array containing the numeric code point values of each Unicode symbol in the string. Java strings are [UTF-16](https://mathiasbynens.be/notes/javascript-encoding), so this function converts a pair of surrogate halves — which UTF-16 stores as two separate `char`s — into the single code point it represents. Unmatched surrogates are passed through as their own value.
 
-```js
-punycode.ucs2.decode('abc');
+```java
+Punycode.Ucs2.decode("abc");
 // → [0x61, 0x62, 0x63]
 // surrogate pair for U+1D306 TETRAGRAM FOR CENTRE:
-punycode.ucs2.decode('\uD834\uDF06');
+Punycode.Ucs2.decode("𝌆");
 // → [0x1D306]
 ```
 
-#### `punycode.ucs2.encode(codePoints)`
+#### `Punycode.Ucs2.encode(int[] codePoints)`
 
-Creates a string based on an array of numeric code point values.
+Creates a string based on an array of numeric code point values. The given array is not modified.
 
-```js
-punycode.ucs2.encode([0x61, 0x62, 0x63]);
-// → 'abc'
-punycode.ucs2.encode([0x1D306]);
-// → '\uD834\uDF06'
+```java
+Punycode.Ucs2.encode(new int[] { 0x61, 0x62, 0x63 });
+// → "abc"
+Punycode.Ucs2.encode(new int[] { 0x1D306 });
+// → "𝌆"
 ```
 
-### `punycode.version`
+### `Punycode.VERSION`
 
-A string representing the current Punycode.js version number.
+A string representing the current Punycode version number.
 
 ## For maintainers
 
+### How to build and test
+
+```sh
+mvn verify
+```
+
 ### How to publish a new release
 
-1. On the `main` branch, bump the version number in `package.json`:
+1. On the `main` branch, bump the version number in `pom.xml`:
 
     ```sh
-    npm version patch -m 'Release v%s'
+    mvn versions:set -DnewVersion=X.Y.Z
     ```
 
-    Instead of `patch`, use `minor` or `major` [as needed](https://semver.org/).
+    Then commit and tag the release:
 
-    Note that this produces a Git commit + tag.
+    ```sh
+    git commit -am 'Release vX.Y.Z' && git tag vX.Y.Z
+    ```
 
 1. Push the release commit and tag:
 
@@ -135,7 +149,7 @@ A string representing the current Punycode.js version number.
     git push && git push --tags
     ```
 
-    Our CI then automatically publishes the new release to npm, under both the [`punycode`](https://www.npmjs.com/package/punycode) and [`punycode.js`](https://www.npmjs.com/package/punycode.js) names.
+    Our CI then automatically publishes the new release to [Maven Central](https://central.sonatype.com/artifact/be.mathiasbynens/punycode).
 
 ## Author
 
@@ -145,4 +159,4 @@ A string representing the current Punycode.js version number.
 
 ## License
 
-Punycode.js is available under the [MIT](https://mths.be/mit) license.
+Punycode is available under the [MIT](https://mths.be/mit) license.
